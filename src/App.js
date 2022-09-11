@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import * as React from 'react';
+import Container from '@mui/material/Container';
 
-function App() {
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import ResponsiveDrawer from "./components/Drawer";
+import {QueryClient, QueryClientProvider, useQueryClient} from "@tanstack/react-query";
+import SimpleMap from "./components/Map";
+import {AppRouter} from "./components/AppRouter";
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+const queryClient = new QueryClient()
+
+export default function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Container>
+          <ResponsiveDrawer/>
+        </Container>
+        </ThemeProvider>
+    </QueryClientProvider>
+
   );
 }
-
-export default App;
