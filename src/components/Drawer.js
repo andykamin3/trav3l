@@ -30,6 +30,7 @@ import {
   SyncLock
 } from "@mui/icons-material";
 import {providerOptions} from "./utils/ProviderOptions";
+import {WalletContext} from "../App";
 
 const drawerWidth = 240;
 
@@ -84,6 +85,8 @@ export default function ResponsiveDrawer(props) {
         setLibrary(library);
         if (accounts) setAccount(accounts[0]);
         setChainId(network.chainId);
+
+
       } catch (error) {
         setError(error);
       }

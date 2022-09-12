@@ -15,9 +15,7 @@ const darkTheme = createTheme({
   },
 });
 const queryClient = new QueryClient()
-
 export default function App() {
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={darkTheme}>
@@ -27,6 +25,5 @@ export default function App() {
         </Container>
         </ThemeProvider>
     </QueryClientProvider>
-
   );
 }
