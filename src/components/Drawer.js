@@ -16,8 +16,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import {Button} from "@mui/material";
+import {Button, Chip} from "@mui/material";
 import {AppRouter} from "./AppRouter";
+import { ethers } from "ethers";
+import Web3Modal from "web3modal";
 import {
   Article, Bookmark,
   HomeOutlined,
@@ -27,6 +29,8 @@ import {
   SaveSharp,
   SyncLock
 } from "@mui/icons-material";
+import {providerOptions} from "./utils/ProviderOptions";
+import {WalletContext} from "../App";
 
 const drawerWidth = 240;
 
@@ -54,23 +58,40 @@ export default function ResponsiveDrawer(props) {
           </ListItem>
         ))}
       </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+
     </div>
   );
 
   const container = window !== undefined ? () => window().document.body : undefined;
+  const [provider, setProvider] = React.useState(null);
+  const [address, setAddress] = React.useState(null);
+  const [library, setLibrary] = React.useState(null);
+  const [chainId, setChainId] = React.useState(null);
+  const [error, setError] = React.useState(null);
+  const [account, setAccount] = React.useState(null);
+  const web3Modal = new Web3Modal({
+    cacheProvider: true, // optional
+    providerOptions // required
+  });
+
+  // Connect wallet with web3 modal
+    const connectWallet = async () => {
+      try {
+        const provider = await web3Modal.connect();
+        const library = new ethers.providers.Web3Provider(provider);
+        const accounts = await library.listAccounts();
+        const network = await library.getNetwork();
+        setProvider(provider);
+        setLibrary(library);
+        if (accounts) setAccount(accounts[0]);
+        setChainId(network.chainId);
+
+
+      } catch (error) {
+        setError(error);
+      }
+    };
+
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -98,9 +119,9 @@ export default function ResponsiveDrawer(props) {
           <Typography variant="h6" noWrap component="div">
             tibbi
           </Typography>
-          <Button variant={"contained"}>
-            Log in with Ethereum
-          </Button>
+
+            {account ? <Chip variant={"filled"} label={account.substring(0,6)+"..."+account.substring(account.length-6,account.length-1)}></Chip> :<Button variant={"contained"} onClick={connectWallet}>Connect wallet</Button>}
+
         </Toolbar>
       </AppBar>
       <Box
