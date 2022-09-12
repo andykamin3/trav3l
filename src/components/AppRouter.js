@@ -1,6 +1,7 @@
 import {BrowserRouter, Outlet, Route, Routes, useParams} from "react-router-dom";
 import {Home} from "./Home";
 import {Profile} from "./Profile";
+import {ContentForm} from "./ContentForm";
 import {LinearProgress, Typography} from "@mui/material";
 import {ArrowBack, Downloading} from "@mui/icons-material";
 import {useEffect, useState} from "react";
@@ -17,6 +18,7 @@ export function AppRouter(){
         <Route path="/locations" element={<LocationPage/>}>
           <Route path={":locationId"}  element={<LocationProfile/>}/>
         </Route>
+        <Route path="/new" element={<ContentForm/>}/>
       </Routes>
     </BrowserRouter>
   )
