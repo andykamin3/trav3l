@@ -1,18 +1,30 @@
 import React from "react";
-import { Tooltip, Paper, Stack, TextField, Button, IconButton, FormGroup, FormControl, InputLabel, Input, FormHelperText } from '@mui/material';
+import {
+    Tooltip,
+    Paper,
+    Stack,
+    TextField,
+    Button,
+    IconButton,
+    FormGroup,
+    FormControl,
+    InputLabel,
+    Input,
+    FormHelperText,
+    DialogActions, DialogContent
+} from '@mui/material';
 import { HelpOutline, AddPhotoAlternate, DriveFileMoveRounded } from "@mui/icons-material";
 import { width } from "@mui/system";
 
-export function ContentForm() {
+export function ContentForm(props) {
+    const position = props.position;
+    console.log(position);
     return (
         <div>
-            <Paper elevation={1}>
+            <DialogContent>
                 <FormGroup>
-                <Tooltip title={"Write a review. Tell the community how was your experience.\nWas it a restaurant? What did you order? How was the service?\nWas it a park? How crowded was it? Did you jog, walk or rested?"}>
-                    <Button sx={{ m: 1, width:10 }}><HelpOutline/></Button>
-                    </Tooltip>
                     <Stack spacing={3} sx={{ p: 2 }}>
-                    
+
                         <FormControl>
                             <InputLabel htmlFor="title">Title</InputLabel>
                             <Input id="title" aria-describedby="title-helper-text" />
@@ -30,21 +42,23 @@ export function ContentForm() {
                         </FormControl>
                         <div>
                             <FormControl>
-                                <Button variant="outlined" component="label">
+                                <Button sx={{"width":"100%"}} variant="outlined" component="label">
+                                    Upload media
                                     <AddPhotoAlternate />
                                     <input hidden accept="image/*" multiple type="file" />
                                 </Button>
-                            </FormControl>
-                            <FormControl>
-                                <Button variant="contained" component="label">
-                                    Upload
-                                    <input hidden accept="image/*" multiple type="file" />
-                                </Button>
+                                <FormHelperText id="media-helper-text">Upload an image or a video to share.</FormHelperText>
                             </FormControl>
                         </div>
                     </Stack>
                 </FormGroup>
-            </Paper>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={props.handleClose}>Cancel</Button>
+                <Button onClick={props.handleClose}>
+                    Upload
+                </Button>
+            </DialogActions>
         </div>
     );
 }
