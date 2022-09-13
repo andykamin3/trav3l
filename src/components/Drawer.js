@@ -6,31 +6,19 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {Button, Chip} from "@mui/material";
 import {AppRouter} from "./AppRouter";
-import { ethers } from "ethers";
-import Web3Modal from "web3modal";
-import {
-  Article, Bookmark,
-  HomeOutlined,
-  HomeSharp,
-  QueryBuilder,
-  QueryBuilderSharp,
-  SaveSharp,
-  SyncLock
-} from "@mui/icons-material";
-import {providerOptions} from "./utils/ProviderOptions";
-import {WalletContext} from "../App";
+import {Article, Bookmark, HomeSharp, QueryBuilderSharp} from "@mui/icons-material";
+import {updateWallet, web3Modal} from "./Web3Modal";
+import {login} from "./utils/lens/login";
 
 const drawerWidth = 240;
 
@@ -69,24 +57,23 @@ export default function ResponsiveDrawer(props) {
   const [chainId, setChainId] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [account, setAccount] = React.useState(null);
-  const web3Modal = new Web3Modal({
-    cacheProvider: true, // optional
-    providerOptions // required
-  });
+
+
+
 
   // Connect wallet with web3 modal
     const connectWallet = async () => {
       try {
-        const provider = await web3Modal.connect();
-        const library = new ethers.providers.Web3Provider(provider);
-        const accounts = await library.listAccounts();
-        const network = await library.getNetwork();
+        await web3Modal.clearCachedProvider();
+        const {provider, library, accounts, network, signer} = await updateWallet(web3Modal);
         setProvider(provider);
         setLibrary(library);
-        if (accounts) setAccount(accounts[0]);
+        console.log(signer);
+        console.log(network.chainId);
         setChainId(network.chainId);
-
-
+        let loginResult = await login(signer, accounts[0]);
+        if (accounts) setAccount(accounts[0]);
+        console.log(loginResult);
       } catch (error) {
         setError(error);
       }
@@ -120,7 +107,7 @@ export default function ResponsiveDrawer(props) {
             tibbi
           </Typography>
 
-            {account ? <Chip variant={"filled"} label={account.substring(0,6)+"..."+account.substring(account.length-6,account.length-1)}></Chip> :<Button variant={"contained"} onClick={connectWallet}>Connect wallet</Button>}
+            {account ? <Chip variant={"filled"} label={account.substring(0,6)+"..."+account.substring(account.length-6,account.length-1)}></Chip> :<Button variant={"contained"} onClick={connectWallet}>Log in with Lens</Button>}
 
         </Toolbar>
       </AppBar>
