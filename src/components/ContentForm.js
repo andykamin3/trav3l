@@ -11,28 +11,48 @@ import {
     InputLabel,
     Input,
     FormHelperText,
-    DialogActions, DialogContent
+    DialogActions, DialogContent, LinearProgress
 } from '@mui/material';
 import { HelpOutline, AddPhotoAlternate, DriveFileMoveRounded } from "@mui/icons-material";
 import { width } from "@mui/system";
 import {storeMetadata} from "./utils/upload-metadata";
-import {updateWallet, web3Modal} from "./Web3Modal";
+import {logInWithWallet, web3Modal} from "./Web3Modal";
+import {createPost} from "./utils/post";
+import {login} from "./utils/lens/login";
 
 export function ContentForm(props) {
     const [title, setTitle] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
     const [description, setDescription] = React.useState("");
     const [file, setFile] = React.useState(null);
     const position = props.position;
     console.log(position);
     const submitForm = async (e) => {
         e.preventDefault();
-        const {provider, library, accounts, network, signer} = await updateWallet(web3Modal);
-        const metadata = storeMetadata({
-            title: title,
-            description: description,
-            longitude: position.longitude,
-            latitude: position.latitude
-        }, file, signer);
+        try {
+
+            setIsLoading(true);
+            ;
+
+            const {provider, library, accounts, network, signer} = await logInWithWallet(web3Modal);
+            const logging_in = await login(signer, await signer.getAddress());
+            if (position.lat === undefined || position.lng === undefined) {
+                throw Error("Undefine position");
+            }
+            const metadata = await storeMetadata({
+                title: title,
+                description: description,
+                longitude: position.lng,
+                latitude: position.lat
+            }, file, signer);
+            console.log( metadata);
+            await createPost(signer, metadata);
+            setIsLoading(false);
+        } catch (e) {
+            console.log(e);
+            setIsLoading(false);
+        }
+
     }
 
     console.log({
@@ -77,10 +97,11 @@ export function ContentForm(props) {
                         </div>
                     </Stack>
                 </FormGroup>
+                {isLoading && <LinearProgress/>}
             </DialogContent>
             <DialogActions>
-                <Button onClick={props.handleClose}>Cancel</Button>
-                <Button onClick={props.handleClose} type={"submit"}>
+                <Button onClick={props.handleClose}>Close</Button>
+                <Button type={"submit"}>
                     Upload
                 </Button>
             </DialogActions>

@@ -15,21 +15,23 @@ export const storeMetadata = async (metadata, mediaObject, signer) => {
   // We use custom NFT metadata schema to be able to upload to Lens.
   const nft = {
     name: metadata.title,
+    locale: "en-US",
     description: metadata.description,
-    content: metadata.description,
-    media: ipfs_url,
-    image: ipfs_url ,
-    external_url: {item:ipfs_url}, //TODO: Add more content metadata and info.
+    media: [{item:ipfs_url, alt:"TODO"}],
+    image: ipfs_url,
+    tags:["travel"],
+    mainContentFocus:"IMAGE",
+    external_url: ipfs_url, //TODO: Add more content metadata and info.
     attributes: [
       {
         displayType: "number",
-        traitType: "longitude",
-        value: metadata.longitude,
+        traitType: "lng",
+        value: metadata.lng,
       },
       {
         displayType: "number",
-        traitType: "latitude",
-        value: metadata.longitude,
+        traitType: "lat",
+        value: metadata.lat,
       }
     ],
     appId: "trav3l",
@@ -38,13 +40,13 @@ export const storeMetadata = async (metadata, mediaObject, signer) => {
   }
   console.log(nft);
   const blob = new Blob([JSON.stringify(nft)], { type: 'application/json' });
-
-
   const client = new NFTStorage({ token: key });
   const metadataCid = await client.storeBlob(blob);
   console.log(metadataCid);
   return metadataCid;
+
 }
+
 
 
 

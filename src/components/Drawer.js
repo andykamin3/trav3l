@@ -17,8 +17,9 @@ import Typography from '@mui/material/Typography';
 import {Button, Chip} from "@mui/material";
 import {AppRouter} from "./AppRouter";
 import {Article, Bookmark, HomeSharp, QueryBuilderSharp} from "@mui/icons-material";
-import {updateWallet, web3Modal} from "./Web3Modal";
+import {logInWithWallet, web3Modal} from "./Web3Modal";
 import {login} from "./utils/lens/login";
+import {getProfiles} from "./utils/lens/get-user";
 
 const drawerWidth = 240;
 
@@ -65,13 +66,15 @@ export default function ResponsiveDrawer(props) {
     const connectWallet = async () => {
       try {
         await web3Modal.clearCachedProvider();
-        const {provider, library, accounts, network, signer} = await updateWallet(web3Modal);
+        const {provider, library, accounts, network, signer} = await logInWithWallet(web3Modal);
         setProvider(provider);
         setLibrary(library);
         console.log(signer);
-        console.log(network.chainId);
         setChainId(network.chainId);
         let loginResult = await login(signer, accounts[0]);
+        let profileData = await getProfiles(accounts[0]);
+        console.log(profileData.profiles.items[0]);
+
         if (accounts) setAccount(accounts[0]);
         console.log(loginResult);
       } catch (error) {

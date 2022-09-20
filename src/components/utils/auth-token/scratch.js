@@ -8,5 +8,6 @@ export const getAuthenticationToken = () => {
 
 export const setAuthenticationToken = token => {
   const cookies = new Cookies();
-  cookies.set('token', token, { path: '/' });
+  cookies.set('token', token, { path: '/', maxAge: 1200});
 };
+

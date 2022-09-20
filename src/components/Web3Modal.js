@@ -13,13 +13,13 @@ export const web3Modal = new Web3Modal({
   * @param {Web3Modal} web3Modal
   * @returns {Object} {provider, library, accounts, network, signer}
  */
-export const updateWallet = async web3Modal => {
+export const logInWithWallet = async web3Modal => {
   try {
     const provider = await web3Modal.connect();
     const library = new ethers.providers.Web3Provider(provider);
     const accounts = await library.listAccounts();
     const network = await library.getNetwork();
-    const signer = library.getSigner();
+    const signer = await library.getSigner();
     return {provider, library, accounts, network, signer};
   } catch (error) {
     console.log(error);
