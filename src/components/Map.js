@@ -15,6 +15,7 @@ import {pink} from "@mui/material/colors";
 import {Link} from "react-router-dom";
 import {ContentForm} from "./ContentForm";
 import {explore} from "./utils/lens/fetch-posts";
+import Box from "@mui/material/Box";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
@@ -123,7 +124,7 @@ function ModalPin(props){
 
 
           </Typography>
-          <img src={props.metadata.media[0].original.url}></img>
+          <Box component={"img"} sx={{maxWidth:"560px"}} src={props.metadata.media[0].original.url}></Box>
           <Typography variant={'body1'}>
             {props.metadata.description}
           </Typography>
