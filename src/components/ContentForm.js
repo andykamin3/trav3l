@@ -42,8 +42,8 @@ export function ContentForm(props) {
             const metadata = await storeMetadata({
                 title: title,
                 description: description,
-                longitude: position.lng,
-                latitude: position.lat
+                lng: position.lng,
+                lat: position.lat
             }, file, signer);
             console.log( metadata);
             await createPost(signer, metadata);

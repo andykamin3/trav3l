@@ -1,26 +1,27 @@
 import React, {useEffect} from "react";
 import GoogleMapReact from 'google-map-react';
 import {
-  Avatar,
+  Avatar, AvatarGroup,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Tooltip
+  Tooltip, Typography
 } from "@mui/material";
-import {AddLocation, HelpOutline, Pin} from "@mui/icons-material";
+import {AddLocation, HelpOutline, Pin, Place} from "@mui/icons-material";
 import {pink} from "@mui/material/colors";
 import {Link} from "react-router-dom";
 import {ContentForm} from "./ContentForm";
+import {explore} from "./utils/lens/fetch-posts";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 export default function SimpleMap(props){
   const [createNewPin, setCreateNewPin] = React.useState(false);
   const [currentPosition, setCurrentPosition] = React.useState(null);
-
+  const [pins, setPins] = React.useState([]);
 
 
   let [map, setMap] = React.useState(null);
@@ -45,6 +46,20 @@ export default function SimpleMap(props){
       map.panTo({lat, lng});
     }
   }, [place]);
+
+  //Use effect with async call
+  useEffect(() => {
+    async function fetchData() {
+      const posts = await explore();
+      //TODO: pagination
+      const displayableItems = posts.explorePublications.items.filter((item) => item.metadata.attributes[0].value!=null && item.metadata.attributes[1].value!=null);
+      setPins(displayableItems);
+      console.log(displayableItems);
+    }
+    fetchData().then(r => console.log("Done")).catch(
+      e => console.log(e)
+    )
+  },[]);
 
 
 
@@ -72,11 +87,55 @@ export default function SimpleMap(props){
         }}
       >
         {createNewPin && currentPosition!==null && <AlertDialog position={currentPosition} lat={currentPosition.lat} lng={currentPosition.lng} />}
-        <Avatar  alt="Remy Sharp"  src="https://mui.com/static/images/avatar/1.jpg"  lat={-34.603722} lng={-58.3819}
-          onClick={() => console.log("You clicked me!")}
-        />
+        {pins.map((pin) => {
+           return (<ModalPin onClick={()=>setCreateNewPin(false)} metadata={pin.metadata} lng={pin.metadata.attributes[0].value} lat={pin.metadata.attributes[1].value}></ModalPin>);
+    })}
+
 
       </GoogleMapReact>
+
+    </div>
+  );
+}
+
+function ModalPin(props){
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  }
+  const handleClose = () => {
+    setOpen(false);
+  }
+
+  return (
+    <div>
+      <Tooltip title="Click to learn more">
+        <Avatar lng={props.metadata.attributes[0].value} lat={props.metadata.attributes[1].value} onClick={handleClickOpen}>
+          <Place/>
+        </Avatar>
+      </Tooltip>
+      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Place Information</DialogTitle>
+        <DialogContent>
+          <Typography variant={'h3'}>
+            {props.metadata.name}
+
+
+          </Typography>
+          <img src={props.metadata.media[0].original.url}></img>
+          <Typography variant={'body1'}>
+            {props.metadata.description}
+          </Typography>
+
+
+
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
