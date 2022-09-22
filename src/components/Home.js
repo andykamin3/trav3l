@@ -1,8 +1,9 @@
 import Box from "@mui/material/Box";
-import {Paper, Typography} from "@mui/material";
+import {FormControl, Input, InputLabel, Paper, Typography} from "@mui/material";
 import React from "react";
 import Stack from "@mui/material/Stack";
 import SimpleMap from "./Map";
+import {Label} from "@mui/icons-material";
 export function Home() {
   return (
     <div>
@@ -24,15 +25,11 @@ export function Home() {
 const LocationSearch = (props) => {
   const autoCompleteRef = React.useRef();
   const inputRef = React.useRef();
-  const options={
-    "types": ["(cities)"],
-  }
   const [place, setPlace] = React.useState(null);
 
   React.useEffect(() => {
     autoCompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
-      options
     );
     autoCompleteRef.current.addListener("place_changed", async function () {
       const place = await autoCompleteRef.current.getPlace();
@@ -42,11 +39,10 @@ const LocationSearch = (props) => {
   return (
     <Stack spacing={2}>
       <Box>
-        <input style={{
-          "width":"100%",
-        }} label="Search"
-          ref={inputRef}
-        />
+        <FormControl>
+          <InputLabel htmlFor="place">Search for a location</InputLabel>
+          <Input inputRef={inputRef}></Input>
+        </FormControl>
       </Box>
 
       <Box height={"100%"}>

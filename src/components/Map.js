@@ -121,17 +121,11 @@ function ModalPin(props){
         <DialogContent>
           <Typography variant={'h3'}>
             {props.metadata.name}
-
-
           </Typography>
           <Box component={"img"} sx={{maxWidth:"560px"}} src={props.metadata.media[0].original.url}></Box>
           <Typography variant={'body1'}>
             {props.metadata.description}
           </Typography>
-
-
-
-
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
