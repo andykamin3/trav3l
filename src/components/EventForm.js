@@ -16,18 +16,19 @@ import {
 //import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { HelpOutline, AddPhotoAlternate, DriveFileMoveRounded } from "@mui/icons-material";
 import { width } from "@mui/system";
-import { storeMetadata } from "./utils/upload-metadata";
+import {storeMetadata, uploadImage} from "./utils/upload-metadata";
 import { logInWithWallet, web3Modal } from "./Web3Modal";
 import { createPost } from "./utils/post";
 import { login } from "./utils/lens/login";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {getProfiles} from "./utils/lens/get-user";
+import {addEventToTable, defineTable} from "./utils/tableland-utils";
 
 export function EventForm(props) {
+
     const autoCompleteRef = React.useRef();
     const inputRef = React.useRef();
-
     const [place, setPlace] = React.useState(null);
 
     React.useEffect(() => {
@@ -49,13 +50,39 @@ export function EventForm(props) {
     const [endDate, setEndDate] = React.useState(null);
     const submitForm = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         const {provider, library, accounts, network, signer} = await logInWithWallet(web3Modal);
         const logging_in = await login(signer, await signer.getAddress());
-        const profile = (await getProfiles(await signer.getAddress()))[0];
+        const profile = (await getProfiles(await signer.getAddress())).profiles.items[0];
         console.log(profile);
-        e.preventDefault();
-        const message = {title,description, file, link, startDate, endDate, profileId: profile.profileId};
-        console.log(message);
+
+        try {
+            const imageCid = await uploadImage(file, signer);
+            const ipfs_url = `https://ipfs.io/ipfs/${imageCid}`;
+            const message = {
+                name: title,
+                description,
+                url: link,
+                image: ipfs_url,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                ownedBy: profile.ownedBy,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+                address: place.formatted_address,
+                placeName: place.name,
+            };
+
+            const writeOp = await addEventToTable(message)
+            console.log(message)//
+            console.log(message, writeOp);
+            setIsLoading(false);
+
+        } catch (e) {
+            setIsLoading(false);
+            console.log(e);
+        }
+
 
 
     }
@@ -64,7 +91,10 @@ export function EventForm(props) {
 
 
     return (
+
         <div>
+
+            <Button variant={"outlined"} onClick={defineTable} ></Button>
             <form id={'form-data'} onSubmit={submitForm}>
                 <DialogContent>
                     <FormGroup>
@@ -104,7 +134,6 @@ export function EventForm(props) {
                                 </DatePicker>
                                 <DatePicker
                                   label="End date"
-
                                   onChange={d=>setEndDate(d)}
                                   value={endDate}
                                   renderInput={(params) => <TextField {...params} />}
@@ -153,7 +182,6 @@ export function EventForm(props) {
                             </div>
                         </Stack>
                     </FormGroup>
-                    {isLoading && <LinearProgress />}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={props.handleClose}>Close</Button>
@@ -162,6 +190,7 @@ export function EventForm(props) {
                     </Button>
                 </DialogActions>
             </form>
+            {isLoading && <LinearProgress />}
         </div >
     );
 }

@@ -2,7 +2,7 @@ import { NFTStorage } from 'nft.storage/dist/bundle.esm.min.js'
 import { v4 as uuidv4 } from 'uuid';
 const key = process.env.REACT_APP_NFT_STORAGE_KEY;
 
-const uploadImage = async (file) => {
+export const uploadImage = async (file) => {
   const client = new NFTStorage({ token: key });
   const cid = await client.storeBlob(file);
   console.log(cid)

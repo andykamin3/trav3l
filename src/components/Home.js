@@ -4,6 +4,7 @@ import React from "react";
 import Stack from "@mui/material/Stack";
 import SimpleMap from "./Map";
 import {Label} from "@mui/icons-material";
+import {Events} from "./events";
 export function Home() {
   return (
     <div>

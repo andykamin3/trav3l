@@ -12,7 +12,7 @@ export const omit = (object, name) => {
 };
 
 function isInteger(value) {
-  return (typeof(value) === "number" && value == value && (value % 1) === 0);
+  return (typeof(value) === "number" && value === value && (value % 1) === 0);
 }
 
 export function isBytes(value) {
