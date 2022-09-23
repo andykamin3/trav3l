@@ -10,12 +10,19 @@ import {
   DialogTitle,
   Tooltip, Typography
 } from "@mui/material";
-import {AddLocation, HelpOutline, Pin, Place} from "@mui/icons-material";
-import {pink} from "@mui/material/colors";
+import {AddLocation, Favorite, HelpOutline, LibraryAdd, Pin, Place, Repeat} from "@mui/icons-material";
+import {grey, pink} from "@mui/material/colors";
 import {Link} from "react-router-dom";
 import {ContentForm} from "./ContentForm";
 import {explore} from "./utils/lens/fetch-posts";
 import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
+import {login} from "./utils/lens/login";
+import {logInWithWallet, web3Modal} from "./Web3Modal";
+import {getProfiles} from "./utils/lens/get-user";
+import {addReactionRequest} from "./utils/lens/reactions";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
@@ -23,7 +30,6 @@ export default function SimpleMap(props){
   const [createNewPin, setCreateNewPin] = React.useState(false);
   const [currentPosition, setCurrentPosition] = React.useState(null);
   const [pins, setPins] = React.useState([]);
-
 
   let [map, setMap] = React.useState(null);
   const defaultProps = {
@@ -88,8 +94,8 @@ export default function SimpleMap(props){
         }}
       >
         {createNewPin && currentPosition!==null && <AlertDialog position={currentPosition} lat={currentPosition.lat} lng={currentPosition.lng} />}
-        {pins.map((pin) => {
-           return (<ModalPin onClick={()=>setCreateNewPin(false)} metadata={pin.metadata} lng={pin.metadata.attributes[0].value} lat={pin.metadata.attributes[1].value}></ModalPin>);
+        {pins.map((pin,o) => {
+           return (<ModalPin key={o} id={pin.id} onClick={()=>setCreateNewPin(false)} profile={pin.profile} metadata={pin.metadata} lng={pin.metadata.attributes[0].value} lat={pin.metadata.attributes[1].value}></ModalPin>);
     })}
 
 
@@ -101,7 +107,7 @@ export default function SimpleMap(props){
 
 function ModalPin(props){
   const [open, setOpen] = React.useState(false);
-
+  const [reaction, setReaction] = React.useState(null);
   const handleClickOpen = () => {
     setOpen(true);
   }
@@ -109,16 +115,36 @@ function ModalPin(props){
     setOpen(false);
   }
 
+  const handleUpvote = async (reaction) => {
+    const {signer} = await logInWithWallet(web3Modal);
+    await login(signer, await signer.getAddress());
+    const profiles = await getProfiles(await signer.getAddress());
+    console.log(profiles.profiles.items[0]);
+    const profileId = profiles.profiles.items[0].id;
+    try {
+      const req = await addReactionRequest(profileId, "UPVOTE", props.id);
+      console.log(req);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (reaction!==null) {
+      setReaction("UPVOTE");
+    } else {
+      setReaction(null);
+    }
+
+  }
+
   return (
     <div>
       <Tooltip title="Click to learn more">
-        <Avatar lng={props.metadata.attributes[0].value} lat={props.metadata.attributes[1].value} onClick={handleClickOpen}>
-          <Place/>
-        </Avatar>
+        <Place sx={{ color: pink[500] }} lng={props.metadata.attributes[0].value} lat={props.metadata.attributes[1].value} onClick={handleClickOpen}>
+        </Place>
       </Tooltip>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Place Information</DialogTitle>
         <DialogContent>
+          <Stack spacing={1}>
           <Typography variant={'h3'}>
             {props.metadata.name}
           </Typography>
@@ -126,9 +152,24 @@ function ModalPin(props){
           <Typography variant={'body1'}>
             {props.metadata.description}
           </Typography>
+          <Divider/>
+            <Stack direction={"row"} spacing={1}>
+            {props.profile.picture && <Avatar src={props.profile.picture}/>}
+            {props.profile.picture === null && <Avatar>{props.profile.handle[0]}</Avatar>}
+          <Typography variant={'h6'}> @{props.profile.handle}</Typography>
+
+              <IconButton onClick={handleUpvote}>
+                <Favorite sx={{color: (reaction!==null ? pink[500] : '0xffffff')}}/>
+              </IconButton>
+              <IconButton>
+                <LibraryAdd/>
+              </IconButton>
+            </Stack>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose}>Close</Button>
+
         </DialogActions>
       </Dialog>
     </div>
