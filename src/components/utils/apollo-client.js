@@ -53,5 +53,8 @@ const authLink = new ApolloLink((operation, forward) => {
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
+  cors: {
+    origin: [process.env.REACT_APP_LENS_API_URL, "https://trav3l-gr19.vercel.app/"]
+  },
   defaultOptions: defaultOptions,
 });
