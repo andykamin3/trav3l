@@ -16,57 +16,85 @@ import {
 //import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { HelpOutline, AddPhotoAlternate, DriveFileMoveRounded } from "@mui/icons-material";
 import { width } from "@mui/system";
-import { storeMetadata } from "./utils/upload-metadata";
+import {storeMetadata, uploadImage} from "./utils/upload-metadata";
 import { logInWithWallet, web3Modal } from "./Web3Modal";
 import { createPost } from "./utils/post";
 import { login } from "./utils/lens/login";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
+import {getProfiles} from "./utils/lens/get-user";
+import {addEventToTable, defineTable} from "./utils/tableland-utils";
 
 export function EventForm(props) {
+
+    const autoCompleteRef = React.useRef();
+    const inputRef = React.useRef();
+    const [place, setPlace] = React.useState(null);
+
+    React.useEffect(() => {
+        autoCompleteRef.current = new window.google.maps.places.Autocomplete(
+          inputRef.current,
+        );
+        autoCompleteRef.current.addListener("place_changed", async function () {
+            const place = await autoCompleteRef.current.getPlace();
+            setPlace(place);
+        });
+    }, []);
+
     const [title, setTitle] = React.useState("");
-    const [link, setLink] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
     const [description, setDescription] = React.useState("");
     const [file, setFile] = React.useState(null);
-    const position = props.position;
-    console.log(position);
+    const [link, setLink] = React.useState("");
+    const [startDate, setStartDate] = React.useState(null);
+    const [endDate, setEndDate] = React.useState(null);
     const submitForm = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        const {provider, library, accounts, network, signer} = await logInWithWallet(web3Modal);
+        const logging_in = await login(signer, await signer.getAddress());
+        const profile = (await getProfiles(await signer.getAddress())).profiles.items[0];
+        console.log(profile);
+
         try {
+            const imageCid = await uploadImage(file, signer);
+            const ipfs_url = `https://ipfs.io/ipfs/${imageCid}`;
+            const message = {
+                name: title,
+                description,
+                url: link,
+                image: ipfs_url,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                ownedBy: profile.ownedBy,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+                address: place.formatted_address,
+                placeName: place.name,
+            };
 
-            setIsLoading(true);
-            ;
-
-            const { provider, library, accounts, network, signer } = await logInWithWallet(web3Modal);
-            const logging_in = await login(signer, await signer.getAddress());
-            if (position.lat === undefined || position.lng === undefined) {
-                throw Error("Undefine position");
-            }
-            const metadata = await storeMetadata({
-                title: title,
-                link: link,
-                description: description,
-                longitude: position.lng,
-                latitude: position.lat
-            }, file, signer);
-            console.log(metadata);
-            await createPost(signer, metadata);
+            const writeOp = await addEventToTable(message)
+            console.log(message)//
+            console.log(message, writeOp);
             setIsLoading(false);
+
         } catch (e) {
-            console.log(e);
             setIsLoading(false);
+            console.log(e);
         }
+
+
 
     }
 
-    console.log({
-        title,
-        description,
-    }, {
-        item: file,
-    })
+
+
 
     return (
+
         <div>
+
+            <Button variant={"outlined"} onClick={defineTable} ></Button>
             <form id={'form-data'} onSubmit={submitForm}>
                 <DialogContent>
                     <FormGroup>
@@ -93,6 +121,37 @@ export function EventForm(props) {
                                 <Input value={link} onChange={event => setLink(event.target.value)} id="link" aria-describedby="link-helper-text" />
                                 <FormHelperText id="link-helper-text">A website with further information of the event</FormHelperText>
                             </FormControl>
+                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                                <Stack spacing={2}>
+                                <DatePicker
+                                  label="Start date"
+
+                                  onChange={d=>setStartDate(d)}
+                                  value={startDate}
+                                  renderInput={(params) => <TextField {...params} />}
+                                >
+
+                                </DatePicker>
+                                <DatePicker
+                                  label="End date"
+                                  onChange={d=>setEndDate(d)}
+                                  value={endDate}
+                                  renderInput={(params) => <TextField {...params} />}
+                                >
+
+                                </DatePicker>
+                                </Stack>
+
+                            </LocalizationProvider>
+                            <Box>
+
+                                <FormGroup>
+                                    <FormControl>
+                                        <InputLabel htmlFor="place">Place</InputLabel>
+                                        <Input inputRef={inputRef}  id="place" aria-describedby="place-helper-text" />
+                                    </FormControl>
+                                </FormGroup>
+                            </Box>
                             {/* <FormControl>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <StaticDateRangePicker
@@ -123,7 +182,6 @@ export function EventForm(props) {
                             </div>
                         </Stack>
                     </FormGroup>
-                    {isLoading && <LinearProgress />}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={props.handleClose}>Close</Button>
@@ -132,6 +190,7 @@ export function EventForm(props) {
                     </Button>
                 </DialogActions>
             </form>
+            {isLoading && <LinearProgress />}
         </div >
     );
 }

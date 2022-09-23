@@ -6,6 +6,7 @@ import ResponsiveDrawer from "./components/Drawer";
 import {QueryClient, QueryClientProvider, useQueryClient} from "@tanstack/react-query";
 import SimpleMap from "./components/Map";
 import {AppRouter} from "./components/AppRouter";
+import TabHome from "./TabHome";
 
 const darkTheme = createTheme({
   palette: {
@@ -19,7 +20,7 @@ export default function App() {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
         <Container>
-          <ResponsiveDrawer/>
+          <AppRouter/>
         </Container>
         </ThemeProvider>
     </QueryClientProvider>

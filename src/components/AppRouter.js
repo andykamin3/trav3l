@@ -6,6 +6,7 @@ import {LinearProgress, Typography} from "@mui/material";
 import {ArrowBack, Downloading} from "@mui/icons-material";
 import {useEffect, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
+import TabHome from "../TabHome";
 
 export function AppRouter(){
   return(
@@ -13,7 +14,7 @@ export function AppRouter(){
       <div>
       </div>
       <Routes>
-        <Route path="/" element={<Home/>}/>
+        <Route path="/" element={<TabHome/>}/>
         <Route path="/profile" element={<Profile/>}/>
         <Route path="/locations" element={<LocationPage/>}>
           <Route path={":locationId"}  element={<LocationProfile/>}/>
