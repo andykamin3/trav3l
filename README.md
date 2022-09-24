@@ -1,6 +1,6 @@
 # trav3l 
 
-
+![trav3l logo](https://bafkreicyuh6uhxkpmlnje7fggaybmq443two4pdyofr4ze3sux433cokb4.ipfs.nftstorage.link/)
 ## About trav3l 
 trav3l is a web3 application that allows users to share their experiences with others to help them plan their next trip. 
 
