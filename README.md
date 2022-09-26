@@ -5,6 +5,7 @@
 trav3l is a web3 application that allows users to share their experiences with others to help them plan their next trip. 
 
 [See a demo](https://trav3l-362116.web.app/).
+[Slides](https://docs.google.com/presentation/d/1Cb4J4F78OfL87FVWNCAXQy84bDbt8w7oLFbl1tyRBmM/edit?usp=sharing)
 
 trav3l right now uses Lens Protocol and Tableland, both deployed on Polygon Mumbai to create a social network for digital nomads and travellers as well as local residents. It strives to be the "TripAdvisor of web3". We intend to leverage Lens's collect feature to allow for creators to be properly rewarded for their content as well as creating token-gated content in the future.
 
